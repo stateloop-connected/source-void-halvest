@@ -1,0 +1,6 @@
+{
+  "name": "void-halvest-shared",
+  "private": true,
+  "type": "module",
+  "description": "Simulation shared by the Colyseus server and the browser client. No DOM, no three.js."
+}

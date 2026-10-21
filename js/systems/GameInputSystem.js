@@ -17,6 +17,12 @@ export class GameInputSystem {
             (this.game.skillCardEffect && this.game.skillCardEffect.isPlaying()) ||
             (this.game.downedLevelUpDust && this.game.downedLevelUpDust.isPlaying());
 
+        // Online co-op never pauses: the shared world keeps running
+        if (this.game.netMode) {
+            this.input.escapePressed = false;
+            this.input.spacePressed = false;
+        }
+
         // 1. Toggle Pause (ESC)
         if (this.input.escapePressed) {
             this.input.escapePressed = false;

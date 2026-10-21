@@ -95,18 +95,10 @@ export class UIManager {
   }
 
   setupEventHandlers() {
+    // Void Halvest: the main button opens the online co-op lobby.
     this.dom.startBtn.onclick = () => {
       this.dom.hide(this.dom.startScreen);
-      this.game.debugWeather = false;
-      // Clear any previous custom settings so we get a pure random start
-      this.game.customEnemies = null;
-      this.game.customSkills = null;
-      this.game.customBiome = null;
-      this.game.customSpawnRate = null;
-      this.game.customMaxEnemies = null;
-      this.game.playerColors = null; // Lobby colors are a co-op choice
-      this.game.isMultiplayer = false; // Reset to single player
-      this.game.start();
+      this.game.ensureNet().hud.openLobby();
     };
 
     this.dom.metaBtn.onclick = () => {
@@ -143,18 +135,19 @@ export class UIManager {
       this.dom.show(this.dom.customModal);
     };
 
+    // The left pill now starts the original single-player run (not online).
     if (this.dom.multiplayerBtn) {
       this.dom.multiplayerBtn.onclick = () => {
         this.dom.hide(this.dom.startScreen);
-        // Restore the last-used co-op colors (persisted in meta progress)
-        const saved = this.game.metaProgress.lobbyColors;
-        if (saved && saved.length === 2) {
-          const p1Input = document.getElementById('p1-color');
-          const p2Input = document.getElementById('p2-color');
-          if (p1Input && saved[0]) p1Input.value = saved[0];
-          if (p2Input && saved[1]) p2Input.value = saved[1];
-        }
-        this.dom.show(this.dom.lobbyModal);
+        this.game.debugWeather = false;
+        this.game.customEnemies = null;
+        this.game.customSkills = null;
+        this.game.customBiome = null;
+        this.game.customSpawnRate = null;
+        this.game.customMaxEnemies = null;
+        this.game.playerColors = null;
+        this.game.isMultiplayer = false;
+        this.game.start();
       };
     }
 
@@ -187,6 +180,7 @@ export class UIManager {
 
     if (this.dom.closeLobbyModal) {
       this.dom.closeLobbyModal.onclick = () => {
+        if (this.game.net && this.game.net.room) this.game.net.leave();
         this.dom.hide(this.dom.lobbyModal);
         this.dom.show(this.dom.startScreen);
       };
@@ -615,8 +609,9 @@ export class UIManager {
     const el = this.dom.downedBanner;
     if (!el) return;
     const g = this.game;
+    // Online, the downed player gets their own prompt; this banner is for the partner
     const downed = (g.isMultiplayer && g.state === 'playing' && g.players)
-      ? g.players.find(p => p.isDowned && p.canBeRevived)
+      ? g.players.find(p => p.isDowned && p.canBeRevived && !(g.netMode && p === g.player))
       : null;
 
     if (!downed) {
@@ -631,9 +626,14 @@ export class UIManager {
     // changes (e.g. P1 revived just as P2 falls)
     if (!el.classList.contains('show') || this.downedBannerId !== downed.id) {
       this.downedBannerId = downed.id;
-      const keyName = downed.id === 0 ? 'E' : 'R-CTRL';
+      // Online both players use E; the partner is named (escaped: it is their text)
+      const keyName = (g.netMode || downed.id === 0) ? 'E' : 'R-CTRL';
+      const netName = g.netMode && g.net && g.net.state ? g.net.state.players.get(downed.netSid)?.name : '';
+      const who = netName
+        ? netName.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+        : `Player ${downed.id + 1}`;
       el.innerHTML = `
-        <div class="downed-title">Player ${downed.id + 1} is down</div>
+        <div class="downed-title">${who} is down</div>
         <div class="downed-sub">Come revive — hold [${keyName}]</div>
         <div class="downed-chevron">&#10095;</div>`;
       el.classList.add('show');

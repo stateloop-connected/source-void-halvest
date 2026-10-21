@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Void Harvest - Roguelite</title>
+    <title>Void Halvest - Online Co-op</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -210,7 +210,7 @@
                                 <span id="main-souls-count">0</span>
                             </div>
                         </button>
-                        <h1>Void Harvest</h1>
+                        <h1>Void Halvest</h1>
                         <button id="guide-btn" class="btn">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
@@ -220,7 +220,8 @@
                             Guide
                         </button>
                     </div>
-                    <p>Survive waves of enemies and become stronger!</p>
+                    <p>Two players, one harvest. Survive the waves together online.</p>
+                    <p class="credit-line" style="font-size: 13px; opacity: .65; margin-top: -6px;">Based on <a href="https://github.com/VictorZakharov/void-harvest-game" target="_blank" rel="noopener" style="color: inherit;">Void Harvest</a> by Victor Zakharov (MIT)</p>
                     <div class="controls-info">
                         <div class="controls-title">Controls</div>
                         <div class="controls-visual">
@@ -308,18 +309,18 @@
 
                             <div class="main-menu-pill">
                                 <!-- 1. 2 Player Co-op -->
-                                <button id="multiplayer-btn" class="btn pill-btn" title="2 Player Co-op">
-                                    <span style="font-weight: bold;">2P</span>
+                                <button id="multiplayer-btn" class="btn pill-btn" title="Solo run (not online)">
+                                    <span style="font-weight: bold;">SOLO</span>
                                 </button>
 
                                 <!-- 2. Start Game (Center) -->
                                 <button id="start-btn" class="btn pill-btn pill-main">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" style="vertical-align: middle; margin-right: 8px;">
-                                        <path d="M20 7h-7L10 2 7 7H0l6 5-2 7 6-4 6 4-2-7z" />
-                                        <path d="M14 7h7l-6 5 2 7-6-4" />
+                                        <circle cx="8" cy="8" r="3" /><circle cx="16" cy="8" r="3" />
+                                        <path d="M2 20c0-3 3-5 6-5s6 2 6 5" /><path d="M12 20c0-3 2-5 4-5s6 2 6 5" />
                                     </svg>
-                                    Start Game
+                                    Play Online Co-op
                                 </button>
 
                                 <!-- 3. Custom Settings -->
@@ -453,103 +454,41 @@
                 <span id="close-custom-modal" class="modal-close-btn">&times;</span>
             </div>
 
-            <!-- Multiplayer Lobby Modal -->
+            <!-- Online Co-op Lobby (Void Halvest) -->
             <div id="lobby-modal" class="modal hidden">
-                <div class="modal-content">
-                    <h2>Co-op Lobby</h2>
-                    <p class="lobby-tagline">Two players survive together. Mouse controls shared light.</p>
-
-                    <div class="lobby-columns">
-
-                        <!-- Player 1 (Left) -->
-                        <div class="lobby-player p1">
-                            <h3>Player 1</h3>
-
-                            <!-- Color Picker -->
-                            <div class="lobby-color-picker">
-                                <label for="p1-color">Color</label>
-                                <input type="color" id="p1-color" value="#00ffff">
-                            </div>
-
-                            <!-- WASD -->
-                            <div class="keyboard-section lobby-move-keys">
-                                <div class="key">W</div>
-                                <div class="keyboard-row">
-                                    <div class="key">A</div>
-                                    <div class="key">S</div>
-                                    <div class="key">D</div>
-                                </div>
-                                <div class="key-label">Move</div>
-                            </div>
-
-                            <!-- Revive E -->
-                            <div class="keyboard-section">
-                                <div class="key">E</div>
-                                <div class="key-label">Revive (Hold 2s)</div>
-                            </div>
+                <div class="modal-content online-lobby">
+                    <h2>Online Co-op</h2>
+                    <p class="lobby-tagline">Two players, one harvest. Carry Void Cores together, revive each other, survive the night.</p>
+                    <div id="ol-setup">
+                        <div class="ol-row">
+                            <label for="ol-name">Name</label>
+                            <input type="text" id="ol-name" maxlength="16" placeholder="Harvester">
+                            <label for="ol-color">Color</label>
+                            <input type="color" id="ol-color" value="#00ffff">
                         </div>
-
-                        <!-- Shared Mouse (Center) -->
-                        <div class="lobby-shared">
-                            <h3>Shared Controls</h3>
-
-                            <div class="mouse-section">
-                                <div class="mouse">
-                                    <div class="mouse-buttons">
-                                        <div class="mouse-button left"></div>
-                                        <div class="mouse-button right"></div>
-                                    </div>
-                                    <div class="mouse-wheel"></div>
-                                </div>
-                            </div>
-
-                            <p class="lobby-shared-note">
-                                <strong>Mouse Controls Shared Light</strong>
-                                P1 Aims/Shoots<br>
-                                P2 Autoshoots
-                            </p>
+                        <div class="ol-row">
+                            <button id="ol-quick" class="btn btn-large">Quick Match</button>
+                            <button id="ol-create" class="btn">Create Private Room</button>
                         </div>
-
-                        <!-- Player 2 (Right) -->
-                        <div class="lobby-player p2">
-                            <h3>Player 2</h3>
-
-                            <!-- Color Picker -->
-                            <div class="lobby-color-picker">
-                                <label for="p2-color">Color</label>
-                                <input type="color" id="p2-color" value="#0088ff">
-                            </div>
-
-                            <!-- Arrow Keys -->
-                            <div class="keyboard-section lobby-move-keys">
-                                <div class="key">↑</div>
-                                <div class="keyboard-row">
-                                    <div class="key">←</div>
-                                    <div class="key">↓</div>
-                                    <div class="key">→</div>
-                                </div>
-                                <div class="key-label">Move</div>
-                            </div>
-
-                            <!-- Revive R-Ctrl -->
-                            <div class="keyboard-section">
-                                <div class="key key-wide">R-Ctrl</div>
-                                <div class="key-label">Revive (Hold 2s)</div>
-                            </div>
+                        <div class="ol-row">
+                            <input type="text" id="ol-code" maxlength="4" placeholder="CODE" autocomplete="off">
+                            <button id="ol-join" class="btn">Join with Code</button>
                         </div>
-
                     </div>
-
-                    <div class="lobby-mechanic">
-                        <strong>Mechanic:</strong> Players split XP. If a player falls, they can be revived. Game Over
-                        if BOTH players fall.
-                        <br><span class="lobby-mechanic-warning">Both players must coordinate to stay within
-                            the light!</span>
+                    <div id="ol-room" class="hidden">
+                        <div class="ol-code-line">Room code <span id="ol-room-code"></span></div>
+                        <div id="ol-players"></div>
+                        <div id="ol-status"></div>
+                        <button id="ol-leave" class="btn btn-small">Leave Room</button>
                     </div>
-
-                    <div class="modal-footer">
-                        <button id="start-coop-btn" class="btn btn-large">START CO-OP</button>
+                    <div id="ol-error"></div>
+                    <div class="ol-controls">
+                        <b>WASD</b> move &middot; <b>Mouse</b> aim, click to fire &middot; <b>Q</b> autoshoot &middot;
+                        <b>Hold E</b> revive your partner or hold a core handle &middot; <b>1-4</b> pick a skill, <b>R</b> reroll &middot;
+                        <b>Enter</b> chat &middot; <b>G</b> ping<br>
+                        The Void Core only moves when you both hold a handle. Steer it together into the green zone.
                     </div>
+                    <div class="ol-controls">Online sessions, including chat and pings, are recorded as Stateloop play data.</div>
                 </div>
                 <span id="close-lobby-modal" class="modal-close-btn">&times;</span>
             </div>

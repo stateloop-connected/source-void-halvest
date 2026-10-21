@@ -1,0 +1,23 @@
+{
+  "level_version": "0.1",
+  "id": "arena",
+  "bounds": { "shape": "box", "min": [0, 0], "max": [4500, 4500], "notes": "Players and the core are clamped inside; enemies may start up to 50 units outside." },
+  "static": [],
+  "goals": [
+    {
+      "id": "deliver_core",
+      "kind": "carry_to_region",
+      "object_type": "core",
+      "region_type": "drop_zone",
+      "notes": "A core and a drop zone spawn together; the zone position is in the drop_zone object. Delivery = core centre inside the zone for 90 game units (~0.7 s)."
+    },
+    { "id": "survive", "kind": "timer", "seconds_game_clock": 600 }
+  ],
+  "target_layout": [],
+  "tasks": [
+    { "id": "carry", "text": "Carry the Void Core together to the drop zone." },
+    { "id": "revive", "text": "Hold E next to your downed partner to revive them." },
+    { "id": "survive", "text": "Survive the waves until the timer ends." }
+  ],
+  "success": "survive until the timer ends; each delivered core is a sub-goal"
+}

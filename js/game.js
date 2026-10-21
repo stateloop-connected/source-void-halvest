@@ -44,6 +44,7 @@ import { SkillCardEffectSystem } from './systems/SkillCardEffectSystem.js';
 import { DownedLevelUpDustSystem } from './systems/DownedLevelUpDustSystem.js';
 import { GameSessionManager } from './GameSessionManager.js';
 import { EnemyManager } from './entities/EnemyManager.js';
+import { NetSession } from './net/NetSession.js';
 
 export class Game {
   constructor() {
@@ -343,7 +344,14 @@ export class Game {
   }
 
   start() {
+    this.netMode = false;
     this.sessionManager.start();
+  }
+
+  /** The online co-op session (created on first use). */
+  ensureNet() {
+    if (!this.net) this.net = new NetSession(this);
+    return this.net;
   }
 
   gameLoop() {
@@ -378,13 +386,28 @@ export class Game {
 
     let t1, t2, t3;
 
-    if (this.state === 'playing') {
+    if (this.netMode && this.net) {
+      // Online co-op: the server simulates; we send inputs and mirror its state.
+      // The shared world keeps running, so one bad frame must not stop the loop.
+      try {
+        t1 = performance.now();
+        this.net.frame(now, dt);
+        t2 = performance.now();
+        if (this.state !== 'start') {
+          this.render3D(dt);
+          t3 = performance.now();
+        }
+      } catch (err) {
+        if (!this._netFrameErr) console.error('[online] frame error', err);
+        this._netFrameErr = (this._netFrameErr || 0) + 1;
+      }
+    } else if (this.state === 'playing') {
       t1 = performance.now();
       this.update(dt);
       t2 = performance.now();
     }
 
-    if (this.state !== 'start') {
+    if (!this.netMode && this.state !== 'start') {
       if (!t2) t2 = performance.now(); // Handle case where update wasn't called (paused)
       this.render3D(dt);
       t3 = performance.now();
@@ -647,7 +670,12 @@ export class Game {
 
     // Camera System Update
     if (this.cameraSystem) {
-      this.cameraSystem.update(dt, this.players, this.state);
+      // Online each client follows its own player (the partner may be far away)
+      let camPlayers = this.players;
+      if (this.netMode && this.player) {
+        camPlayers = (!this.player.isBledOut) ? [this.player] : this.players;
+      }
+      this.cameraSystem.update(dt, camPlayers, this.state);
     }
 
     const target = this.lighting.getCursorTarget();

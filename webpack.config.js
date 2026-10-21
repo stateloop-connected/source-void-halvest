@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
 
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
@@ -32,7 +33,16 @@ module.exports = (env, argv) => {
                 },
             ],
         },
+        resolve: {
+            // @colyseus/sdk only uses `ws` when the browser has no WebSocket
+            fallback: { ws: false },
+        },
         plugins: [
+            // Online co-op server address. The Creator platform passes
+            // browser configuration keys as build environment variables.
+            new webpack.DefinePlugin({
+                __COOP_SERVER_URL__: JSON.stringify(process.env.COOP_SERVER_URL || ''),
+            }),
             new HtmlWebpackPlugin({
                 template: './index.html',
                 inject: 'body',

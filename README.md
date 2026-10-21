@@ -1,4 +1,42 @@
-# Void Harvest - Roguelite
+# Void Halvest - Online Co-op
+
+Void Halvest is an online two-player version of [Void Harvest](https://github.com/VictorZakharov/void-harvest-game) by Victor Zakharov (MIT licence). Two players, one harvest.
+
+Changes from the original:
+
+- **Online co-op on [Colyseus](https://colyseus.io) 0.18.** The server runs the whole simulation (`shared/sim/`) on a fixed 60 Hz step with seeded randomness. Browsers send inputs and draw the server's state. The local player's movement is predicted.
+- **The Void Core.** A heavy bar with two handles. It moves only when both players hold a handle (hold E). Each carrier pushes their end; the core moves with the average and turns with the difference. Carry it into the green zone for XP, healing and score.
+- **No pause online.** Level-up choices appear in a tray at the bottom (keys 1-4, R to reroll) while the game keeps running. XP is shared. Each player has their own cursor light.
+- **Lobby.** Quick Match, private rooms with a 4-letter code, chat (Enter) and pings (G). The left menu button still starts the original single-player game.
+
+## Running it locally
+
+```bash
+npm ci && npm run build            # client -> dist/
+cd server && npm ci && npm start   # Colyseus on ws://localhost:2567
+python3 -m http.server 8137 -d ../dist   # then open http://localhost:8137
+```
+
+The server accepts browser origins from `ALLOWED_ORIGINS` (default: the Stateloop play domains) plus `EXTRA_ORIGINS`.
+`server/dev-server.sh` starts it in the background with `http://localhost:8137` allowed.
+The client connects to `COOP_SERVER_URL` (set at build time) or the `?COOP_SERVER_URL=` page parameter, else `ws://localhost:2567`.
+
+Tests:
+
+- `node shared/test/headless.mjs`: two scripted players play a full run in the simulation with no network; the same seed must give the same run.
+- `cd server && node test/bots.mjs --seconds 60`: two network bots against a running server.
+- `cd server && CODE=ABCD node test/partner-bot.mjs`: a bot partner that joins your room.
+
+## Data
+
+Online sessions are recorded by the Stateloop host as structured state (positions, holders, inputs, events, chat) for robot-learning research.
+`stateloop.coop.json` and `levels/` describe units, shapes and goals for that conversion. The game code does not record anything itself.
+
+---
+
+*The original README follows.*
+
+# Void Harvest - Roguelite (original)
 
 A twin-stick shooter roguelite built with vanilla JavaScript and Three.js, featuring a full 3D world with dynamic lighting, instanced rendering, and 2-player local co-op.
 

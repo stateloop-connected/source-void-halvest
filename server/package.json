@@ -1,0 +1,20 @@
+{
+  "name": "void-halvest-server",
+  "private": true,
+  "type": "module",
+  "description": "Colyseus room for Void Halvest (online co-op). Server-authoritative; runs ../shared/sim.",
+  "engines": { "node": ">= 22.0.0" },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "bots": "node test/bots.mjs"
+  },
+  "dependencies": {
+    "@colyseus/schema": "5.0.42",
+    "@colyseus/tools": "0.18.10",
+    "colyseus": "0.18.9"
+  },
+  "devDependencies": {
+    "@colyseus/sdk": "0.18.5"
+  }
+}
