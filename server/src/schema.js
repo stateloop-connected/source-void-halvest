@@ -74,7 +74,7 @@ export const Obj = schema({
 /** Computer-controlled characters (the guide's reserved `agents` map). */
 export const Agent = schema({
   type: t.string().default(''),
-  x: t.float32().default(0), y: t.float32().default(0), yaw: t.float32().default(0),
+  x: t.float32().default(0), y: t.float32().default(0), z: t.float32().default(0), yaw: t.float32().default(0),
   vx: t.float32().default(0), vy: t.float32().default(0),
   hp: t.number().default(0), maxHp: t.number().default(0),
   frozen: t.boolean().default(false), kneel: t.boolean().default(false),

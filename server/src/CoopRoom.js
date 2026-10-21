@@ -348,6 +348,7 @@ export class CoopRoom extends Room {
     if (!this.world || !msg) return;
     const offer = this.world.reroll(client.sessionId, Number(msg.level));
     if (offer) client.send('offer', offer);
+    else this.broadcast('evt:reject', { seat: client.sessionId, action: 'reroll', object: String(msg.level), reason: 'no_offer_or_used' });
   }
 
   onChat(client, msg) {
