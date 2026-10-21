@@ -1,10 +1,19 @@
 // The co-op room: two seats, a lobby, then runs ("episodes") of the shared
 // simulation on a fixed 60 Hz step. The server is the authority: clients send
 // inputs, the server moves everything and broadcasts what happened.
+import fs from 'node:fs';
 import { Room } from 'colyseus';
-import { InputCmd, CoopState, Player, Obj, Enemy, Attach } from './schema.js';
+import { InputCmd, CoopState, Player, Obj, Agent, Attach } from './schema.js';
 import { World } from '../../shared/sim/world.js';
-import { SIM_HZ, UNITS_PER_TICK, GAME_DURATION, CORE_LENGTH, ZONE_DELIVER_TIME } from '../../shared/sim/config.js';
+import { SIM_HZ, UNITS_PER_TICK, GAME_DURATION, CORE_LENGTH, ZONE_DELIVER_TIME, ARENA_W, ARENA_H } from '../../shared/sim/config.js';
+
+// The level file is the declaration the recordings refer to. The arena size is
+// also a constant in the shared simulation (the client predicts with it), so
+// refuse to start if the two disagree.
+const LEVEL = JSON.parse(fs.readFileSync(new URL('../../levels/arena.json', import.meta.url), 'utf8'));
+if (LEVEL.bounds.min[0] !== 0 || LEVEL.bounds.min[1] !== 0 || LEVEL.bounds.max[0] !== ARENA_W || LEVEL.bounds.max[1] !== ARENA_H) {
+  throw new Error(`levels/${LEVEL.id}.json bounds do not match the simulation arena ${ARENA_W}x${ARENA_H}`);
+}
 
 const COUNTDOWN_S = 3;
 const MAX_INPUT_BACKLOG = 4; // frames (~67 ms) before stale input is skipped
@@ -38,6 +47,7 @@ export class CoopRoom extends Room {
   async onCreate(options = {}) {
     this.roomId = await this.uniqueCode();
     this.state.code = this.roomId;
+    this.state.levelId = LEVEL.id;
     if (options.private) await this.setPrivate(true);
     await this.setMetadata({ code: this.roomId, private: !!options.private });
     this.world = null;
@@ -58,10 +68,11 @@ export class CoopRoom extends Room {
   }
 
   onJoin(client, options = {}) {
-    const taken = new Set([...this.state.players.values()].map((p) => p.seat));
+    const taken = new Set([...this.state.players.values()].map((p) => p.slot));
     const seat = taken.has(0) ? 1 : 0;
     const p = new Player();
-    p.seat = seat;
+    p.slot = seat;
+    p.bot = options.bot === true;
     p.name = String(options.name || `Player ${seat + 1}`).slice(0, 16);
     p.color = /^#[0-9a-fA-F]{6}$/.test(options.color || '') ? options.color : SEAT_COLORS[seat];
     p.x = 2250 + (seat === 0 ? -60 : 60);
@@ -111,7 +122,7 @@ export class CoopRoom extends Room {
   }
 
   startEpisode() {
-    const seats = [...this.state.players.entries()].map(([sid, p]) => ({ sid, seat: p.seat, name: p.name, color: p.color }));
+    const seats = [...this.state.players.entries()].map(([sid, p]) => ({ sid, seat: p.slot, name: p.name, color: p.color }));
     const seed = (Math.random() * 0xffffffff) >>> 0;
     this.world = new World(seed, seats);
     this.state.episode += 1;
@@ -121,7 +132,7 @@ export class CoopRoom extends Room {
     this.state.outcome = '';
     this.state.reason = '';
     this.state.objects.clear();
-    this.state.enemies.clear();
+    this.state.agents.clear();
     for (const p of this.state.players.values()) {
       p.ready = false;
       p.skills.clear();
@@ -291,16 +302,16 @@ export class CoopRoom extends Room {
     const wantE = new Set();
     for (const e of w.enemies) {
       wantE.add(e.id);
-      let s = st.enemies.get(e.id);
+      let s = st.agents.get(e.id);
       if (!s) {
-        s = new Enemy();
+        s = new Agent();
         s.type = e.type;
-        st.enemies.set(e.id, s);
+        st.agents.set(e.id, s);
       }
       s.x = e.x; s.y = e.y; s.yaw = e.angle; s.vx = e.vx; s.vy = e.vy;
       s.hp = e.health; s.maxHp = e.maxHealth; s.frozen = e.frozen; s.kneel = e.kneel;
     }
-    for (const id of [...st.enemies.keys()]) if (!wantE.has(id)) st.enemies.delete(id);
+    for (const id of [...st.agents.keys()]) if (!wantE.has(id)) st.agents.delete(id);
   }
 
   objectFor(id, type) {
@@ -330,7 +341,7 @@ export class CoopRoom extends Room {
   onPick(client, msg) {
     if (!this.world || !msg) return;
     const r = this.world.pickSkill(client.sessionId, Number(msg.level), String(msg.skill));
-    if (!r.ok) client.send('pick_rejected', { level: msg.level, reason: r.reason });
+    if (!r.ok) this.broadcast('evt:reject', { seat: client.sessionId, action: 'pick', object: String(msg.skill || ''), reason: r.reason });
   }
 
   onReroll(client, msg) {

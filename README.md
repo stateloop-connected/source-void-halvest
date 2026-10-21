@@ -19,7 +19,7 @@ python3 -m http.server 8137 -d ../dist   # then open http://localhost:8137
 
 The server accepts browser origins from `ALLOWED_ORIGINS` (default: the Stateloop play domains) plus `EXTRA_ORIGINS`.
 `server/dev-server.sh` starts it in the background with `http://localhost:8137` allowed.
-The client connects to `COOP_SERVER_URL` (set at build time) or the `?COOP_SERVER_URL=` page parameter, else `ws://localhost:2567`.
+The client connects to `COOP_SERVER_URL` (set at build time). Only builds without it accept a `?COOP_SERVER_URL=` page parameter; the default is `ws://localhost:2567`.
 
 Tests:
 

@@ -11,9 +11,9 @@ const SECONDS = Number(args[args.indexOf('--seconds') + 1]) || 120;
 
 function viewFromState(state) {
   const players = [];
-  state.players.forEach((p, sid) => players.push({ sid, seat: p.seat, x: p.x, y: p.y, downed: p.downed, bledOut: p.bledOut, carrying: p.carrying }));
+  state.players.forEach((p, sid) => players.push({ sid, seat: p.slot, x: p.x, y: p.y, downed: p.downed, bledOut: p.bledOut, carrying: p.carrying }));
   const enemies = [];
-  state.enemies.forEach((e) => enemies.push({ x: e.x, y: e.y }));
+  state.agents.forEach((e) => enemies.push({ x: e.x, y: e.y }));
   let core = null, zone = null;
   state.objects.forEach((o) => {
     if (o.type === 'core') { const attach = {}; o.attach.forEach((a, sid) => { attach[sid] = a.handle; }); core = { x: o.x, y: o.y, theta: o.yaw, holders: [...o.heldBy], attach }; }
@@ -23,7 +23,7 @@ function viewFromState(state) {
 }
 
 const client = new Client(URL);
-const room = CODE ? await client.joinById(CODE, { name: 'PartnerBot', color: '#ffaa44' }) : await client.joinOrCreate('coop', { name: 'PartnerBot', color: '#ffaa44' });
+const room = CODE ? await client.joinById(CODE, { name: 'PartnerBot', color: '#ffaa44', bot: true }) : await client.joinOrCreate('coop', { name: 'PartnerBot', color: '#ffaa44', bot: true });
 console.log('joined', room.roomId);
 room.onMessage('*', (type, msg) => {
   if (type === 'offer') room.send('pick', { level: msg.level, skill: msg.choices[0] });

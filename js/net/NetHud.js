@@ -50,6 +50,7 @@ const CSS = `
 .online-lobby .ol-p { padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); min-width: 140px; }
 .online-lobby #ol-status { margin: 8px 0; font-size: 18px; }
 .online-lobby #ol-error { color: #ff7777; min-height: 20px; }
+.online-lobby .ol-notice { font-size: 13px; opacity: .75; margin-top: 6px; }
 .online-lobby .ol-controls { margin-top: 14px; font-size: 14px; opacity: .8; line-height: 1.5; }
 `;
 
@@ -188,7 +189,7 @@ export class NetHud {
   onState(st) {
     const L = this.lobby;
     if (!L.modal || !this.net.room || !st || !st.players) return; // state arrives with the first patch
-    const list = [...st.players.entries()].sort((a, b) => a[1].seat - b[1].seat);
+    const list = [...st.players.entries()].sort((a, b) => a[1].slot - b[1].slot);
     L.players.innerHTML = list.map(([sid, p]) =>
       `<div class="ol-p" style="border-color:${p.color}"><b style="color:${p.color}">${escapeHtml(p.name)}</b>${sid === this.net.sid ? ' (you)' : ''}<br>${p.connected ? (p.ready ? 'ready' : '') : 'reconnecting...'}</div>`).join('');
     if (st.phase === 'lobby') {

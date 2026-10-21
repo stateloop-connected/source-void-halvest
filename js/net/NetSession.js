@@ -18,12 +18,14 @@ const RENDER_DELAY_MS = 100;          // remote interpolation delay (2 patches a
 const BASE_TICK_MS = 1000 / 144;       // the original game's unit of time
 const GAME_SPEED = 0.85;
 
-/** Server address: launch parameter (Creator browser configuration), then build-time default. */
+/** Server address: the build-time value (Creator browser configuration). The
+ * page parameter only works in builds without one (local development), so a
+ * link cannot point a published build at another server. */
 export function serverUrl() {
-  const q = new URLSearchParams(location.search);
   // eslint-disable-next-line no-undef
   const built = typeof __COOP_SERVER_URL__ !== 'undefined' ? __COOP_SERVER_URL__ : '';
-  return q.get('COOP_SERVER_URL') || built || 'ws://localhost:2567';
+  if (built) return built;
+  return new URLSearchParams(location.search).get('COOP_SERVER_URL') || 'ws://localhost:2567';
 }
 
 export class NetSession {
@@ -56,15 +58,14 @@ export class NetSession {
     this.predict = Predict.get(room, { mode: 'lerp', delay: RENDER_DELAY_MS });
     this.predict.attachAll('players', { mode: 'lerp', fields: ['x', 'y'] });
     this.predict.attachAll('players', { mode: 'lerp', fields: ['yaw'], angle: true });
-    this.predict.attachAll('enemies', { mode: 'lerp', fields: ['x', 'y'] });
-    this.predict.attachAll('enemies', { mode: 'lerp', fields: ['yaw'], angle: true });
+    this.predict.attachAll('agents', { mode: 'lerp', fields: ['x', 'y'] });
+    this.predict.attachAll('agents', { mode: 'lerp', fields: ['yaw'], angle: true });
     this.predict.attachAll('objects', { mode: 'lerp', fields: ['x', 'y'] });
     this.predict.attachAll('objects', { mode: 'lerp', fields: ['yaw'], angle: true });
     this.me = null;
 
     room.onMessage('fx', (list) => this.fxQueue.push([performance.now() + RENDER_DELAY_MS, list]));
     room.onMessage('offer', (offer) => this.hud.addOffer(offer));
-    room.onMessage('pick_rejected', () => {});
     room.onMessage('chat', (m) => this.hud.showChat(m));
     room.onMessage('ping', (m) => this.hud.showPing(m));
     room.onMessage('rate', () => {});
@@ -101,9 +102,9 @@ export class NetSession {
     if (g.sessionManager.applyBiomeVisuals) g.sessionManager.applyBiomeVisuals();
 
     // One game Player per seat, in seat order (the renderers expect an array).
-    const entries = [...this.state.players.entries()].sort((a, b) => a[1].seat - b[1].seat);
+    const entries = [...this.state.players.entries()].sort((a, b) => a[1].slot - b[1].slot);
     g.players = entries.map(([sid, s]) => {
-      const p = new Player(s.x - 12, s.y - 12, g.scene, s.seat, s.color);
+      const p = new Player(s.x - 12, s.y - 12, g.scene, s.slot, s.color);
       p.canBeRevived = true;
       p.netSid = sid;
       this.players.set(sid, p);
@@ -271,7 +272,7 @@ export class NetSession {
 
     // enemies: add/update; removed ones topple as corpses (deathTime advances locally)
     const seen = new Set();
-    for (const [id, s] of st.enemies.entries()) {
+    for (const [id, s] of st.agents.entries()) {
       seen.add(id);
       let e = this.enemies.get(id);
       if (!e) {

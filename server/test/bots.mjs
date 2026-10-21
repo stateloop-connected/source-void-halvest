@@ -10,9 +10,9 @@ const PRIVATE = args.includes('--private');
 
 function viewFromState(state) {
   const players = [];
-  state.players.forEach((p, sid) => players.push({ sid, seat: p.seat, x: p.x, y: p.y, downed: p.downed, bledOut: p.bledOut, carrying: p.carrying }));
+  state.players.forEach((p, sid) => players.push({ sid, seat: p.slot, x: p.x, y: p.y, downed: p.downed, bledOut: p.bledOut, carrying: p.carrying }));
   const enemies = [];
-  state.enemies.forEach((e) => enemies.push({ x: e.x, y: e.y }));
+  state.agents.forEach((e) => enemies.push({ x: e.x, y: e.y }));
   let core = null, zone = null;
   state.objects.forEach((o) => {
     if (o.type === 'core') { const attach = {}; o.attach.forEach((a, sid) => { attach[sid] = a.handle; }); core = { x: o.x, y: o.y, theta: o.yaw, holders: [...o.heldBy], attach }; }
@@ -42,9 +42,9 @@ async function bot(name, joinFn) {
   return { name, room, counts, stop: () => clearInterval(timer) };
 }
 
-const a = await bot('A', (c) => (PRIVATE ? c.create('coop', { name: 'BotA', private: true }) : c.joinOrCreate('coop', { name: 'BotA' })));
+const a = await bot('A', (c) => (PRIVATE ? c.create('coop', { name: 'BotA', private: true, bot: true }) : c.joinOrCreate('coop', { name: 'BotA', bot: true })));
 console.log('A joined room', a.room.roomId, 'code', a.room.state.code);
-const b = await bot('B', (c) => (PRIVATE ? c.joinById(a.room.roomId, { name: 'BotB' }) : c.joinOrCreate('coop', { name: 'BotB' })));
+const b = await bot('B', (c) => (PRIVATE ? c.joinById(a.room.roomId, { name: 'BotB', bot: true }) : c.joinOrCreate('coop', { name: 'BotB', bot: true })));
 console.log('B joined room', b.room.roomId);
 
 const t0 = Date.now();
@@ -54,8 +54,8 @@ while (Date.now() - t0 < SECONDS * 1000 && !ended) {
   await new Promise((r) => setTimeout(r, 5000));
   const s = a.room.state;
   let core='none'; s.objects.forEach((o,id)=>{ if(o.type==='core') core=`${id}@${o.x.toFixed(0)},${o.y.toFixed(0)} held=${o.heldBy.length}`; if(o.type==='drop_zone') core+=` zone=${o.progress.toFixed(2)}`; });
-  const pl=[]; s.players.forEach((p)=>pl.push(`${p.seat}:${p.x.toFixed(0)},${p.y.toFixed(0)}${p.carrying?'*':''}${p.downed?'D':''}`));
-  console.log(`players=${pl.join(' ')} core=${core} t=${((Date.now() - t0) / 1000).toFixed(0)}s phase=${s.phase} tick=${s.tick} wave=${s.wave} enemies=${s.enemies.size} objects=${s.objects.size} score=${s.score} kills=${s.kills}`);
+  const pl=[]; s.players.forEach((p)=>pl.push(`${p.slot}:${p.x.toFixed(0)},${p.y.toFixed(0)}${p.carrying?'*':''}${p.downed?'D':''}`));
+  console.log(`players=${pl.join(' ')} core=${core} t=${((Date.now() - t0) / 1000).toFixed(0)}s phase=${s.phase} tick=${s.tick} wave=${s.wave} agents=${s.agents.size} objects=${s.objects.size} score=${s.score} kills=${s.kills}`);
 }
 console.log('A messages', a.counts);
 a.stop(); b.stop();

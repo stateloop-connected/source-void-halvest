@@ -27,14 +27,10 @@
       "y": "down",
       "origin": "top-left of the arena"
     },
-    "positions": "entity centres"
+    "positions": "entity centres",
+    "yaw": "0 points along +x; positive yaw turns from +x towards +y (clockwise on screen, because y points down)"
   },
   "tick_hz": 60,
-  "state_paths": {
-    "players": "players",
-    "objects": "objects",
-    "agents": "enemies"
-  },
   "levels": [
     "arena"
   ],
@@ -166,12 +162,10 @@
     "auto": "toggle: autoshoot",
     "interact": "button held: revive a partner or hold a core handle"
   },
-  "intents": [
-    "revive",
-    "grab_core",
-    "release_core",
-    "pick_skill"
-  ],
+  "intents": {
+    "pick": "message {level, skill}: choose one skill from the offer for that level",
+    "reroll": "message {level}: replace the skills offered for that level, once"
+  },
   "events": {
     "episode_start": "evt:episode_start",
     "episode_end": "evt:episode_end",
@@ -182,14 +176,24 @@
     "subgoal": "evt:subgoal",
     "spawn": "evt:spawn",
     "despawn": "evt:despawn",
-    "contact": "evt:contact"
+    "contact": "evt:contact",
+    "reject": "evt:reject"
   },
   "cosmetic_messages": [
-    "fx",
-    "chat",
-    "ping",
-    "rate",
-    "offer",
-    "pick_rejected"
-  ]
+    "fx"
+  ],
+  "private_messages": {
+    "offer": "{level, choices, rerollUsed}: the skills offered to one player after a level-up (what that player was shown)"
+  },
+  "messages": {
+    "chat": "{text}, re-broadcast as {from, text}",
+    "ping": "{x, y, kind}, re-broadcast as {from, x, y, z, target, kind}",
+    "rate": "{score} 1-5, the partner vote, re-broadcast with the episode",
+    "ui": "{shown}: panels shown to the player (written to players.<id>.shown)",
+    "ready": "{}: ready for the next episode"
+  },
+  "seats": {
+    "bot_field": "players.<id>.bot",
+    "slot_field": "players.<id>.slot"
+  }
 }

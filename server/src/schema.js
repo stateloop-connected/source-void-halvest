@@ -25,7 +25,8 @@ export const Attach = schema({
 }, 'Attach');
 
 export const Player = schema({
-  seat: t.uint8().default(0),
+  slot: t.uint8().default(0),      // 0 or 1, join order. Payloads name players by session id (`seat`).
+  bot: t.boolean().default(false), // a test bot or an AI seat, not a person
   name: t.string().default(''),
   color: t.string().default('#00ffff'),
   ready: t.boolean().default(false),
@@ -55,7 +56,7 @@ export const Player = schema({
 
 /** Every dynamic object and fixture: the core, the drop zone, XP orbs, health packs. */
 export const Obj = schema({
-  type: t.string(),
+  type: t.string().default(''),
   x: t.number().default(0), y: t.number().default(0), z: t.number().default(0),
   yaw: t.number().default(0),
   vx: t.number().default(0), vy: t.number().default(0), omega: t.number().default(0),
@@ -70,14 +71,14 @@ export const Obj = schema({
   tension: t.number().default(0),   // core: carriers pulling apart (>0) or pushing together (<0)
 }, 'Obj');
 
-/** Hostile agents. Not a reserved name in the guide; recorded like objects. */
-export const Enemy = schema({
-  type: t.string(),
+/** Computer-controlled characters (the guide's reserved `agents` map). */
+export const Agent = schema({
+  type: t.string().default(''),
   x: t.float32().default(0), y: t.float32().default(0), yaw: t.float32().default(0),
   vx: t.float32().default(0), vy: t.float32().default(0),
   hp: t.number().default(0), maxHp: t.number().default(0),
   frozen: t.boolean().default(false), kneel: t.boolean().default(false),
-}, 'Enemy');
+}, 'Agent');
 
 export const CoopState = schema({
   phase: t.string().default('lobby'), // lobby | countdown | playing | ended
@@ -96,5 +97,5 @@ export const CoopState = schema({
   reason: t.string().default(''),
   players: t.map(Player),
   objects: t.map(Obj),
-  enemies: t.map(Enemy),
+  agents: t.map(Agent),
 }, 'CoopState');
