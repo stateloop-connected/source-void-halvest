@@ -2,12 +2,31 @@
   "manifest_version": "0.2",
   "rules_version": "1",
   "game": "void-halvest",
-  "rooms": ["coop"],
+  "rooms": [
+    "coop"
+  ],
+  "server": {
+    "dir": "server",
+    "entry": "src/index.js",
+    "node": "22",
+    "include": [
+      "shared",
+      "js/constants.js",
+      "js/skills.js",
+      "js/icons.js"
+    ],
+    "healthcheck": "/__healthcheck",
+    "notes": "Files outside server/ that the server imports. The host copies these, levels/ and this manifest next to server/, keeping the repo layout."
+  },
   "frame": {
     "up": "screen",
     "handedness": "right",
     "unit_m": 0.02,
-    "two_d": { "px_per_m": 50, "y": "down", "origin": "top-left of the arena" },
+    "two_d": {
+      "px_per_m": 50,
+      "y": "down",
+      "origin": "top-left of the arena"
+    },
     "positions": "entity centres"
   },
   "tick_hz": 60,
@@ -16,33 +35,127 @@
     "objects": "objects",
     "agents": "enemies"
   },
-  "levels": ["arena"],
-  "player": { "shape": "circle", "radius": 12, "height": 56, "eye_height_m": 1.0, "mass_kg": 70 },
+  "levels": [
+    "arena"
+  ],
+  "player": {
+    "shape": "circle",
+    "radius": 12,
+    "height": 56,
+    "eye_height_m": 1.0,
+    "mass_kg": 70
+  },
   "types": {
     "core": {
-      "shape": "box", "size": [120, 36, 30], "mass_kg": 40, "graspable": true,
-      "handles": [[-60, 0, 15], [60, 0, 15]], "max_holders": 2, "min_holders_to_move": 2,
+      "shape": "box",
+      "size": [
+        120,
+        36,
+        30
+      ],
+      "mass_kg": 40,
+      "graspable": true,
+      "handles": [
+        [
+          -60,
+          0,
+          15
+        ],
+        [
+          60,
+          0,
+          15
+        ]
+      ],
+      "max_holders": 2,
+      "min_holders_to_move": 2,
       "notes": "The Void Core moves only when both handles are held. Each carrier's input is a wanted velocity at its handle; the core translates with the mean and turns with the difference across the bar."
     },
     "drop_zone": {
-      "shape": "circle", "radius_field": "r", "graspable": false,
-      "articulation": { "kind": "region", "progress_field": "progress", "active_field": "active" }
+      "shape": "circle",
+      "radius_field": "r",
+      "graspable": false,
+      "articulation": {
+        "kind": "region",
+        "progress_field": "progress",
+        "active_field": "active"
+      }
     },
-    "xp_orb": { "shape": "sphere", "radius": 6, "mass_kg": 0.1, "graspable": false, "notes": "Collected by touch (magnet pull)." },
-    "health_pack": { "shape": "box", "size": [12, 12, 12], "mass_kg": 0.3, "graspable": false }
+    "xp_orb": {
+      "shape": "sphere",
+      "radius": 6,
+      "mass_kg": 0.1,
+      "graspable": false,
+      "notes": "Collected by touch (magnet pull)."
+    },
+    "health_pack": {
+      "shape": "box",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "mass_kg": 0.3,
+      "graspable": false
+    }
   },
   "agents": {
-    "enemy_basic": { "shape": "box", "size": [32, 32, 50] },
-    "enemy_fast": { "shape": "box", "size": [28, 28, 42] },
-    "enemy_tank": { "shape": "box", "size": [40, 40, 60] },
-    "enemy_shooter": { "shape": "box", "size": [32, 32, 50] },
-    "enemy_ice": { "shape": "box", "size": [32, 32, 50] }
+    "enemy_basic": {
+      "shape": "box",
+      "size": [
+        32,
+        32,
+        50
+      ]
+    },
+    "enemy_fast": {
+      "shape": "box",
+      "size": [
+        28,
+        28,
+        42
+      ]
+    },
+    "enemy_tank": {
+      "shape": "box",
+      "size": [
+        40,
+        40,
+        60
+      ]
+    },
+    "enemy_shooter": {
+      "shape": "box",
+      "size": [
+        32,
+        32,
+        50
+      ]
+    },
+    "enemy_ice": {
+      "shape": "box",
+      "size": [
+        32,
+        32,
+        50
+      ]
+    }
   },
   "roles": [
-    { "id": "harvester", "sees": [] }
+    {
+      "id": "harvester",
+      "sees": []
+    }
   ],
   "cameras": {
-    "default": { "kind": "chase_top_down", "follows": "own player", "height_m": 8, "pitch_deg": -60, "vfov_deg": 45, "aspect": 1.78 }
+    "default": {
+      "kind": "chase_top_down",
+      "follows": "own player",
+      "height_m": 8,
+      "pitch_deg": -60,
+      "vfov_deg": 45,
+      "aspect": 1.78
+    }
   },
   "inputs": {
     "mx": "wanted move direction, world x, -1..1",
@@ -53,12 +166,30 @@
     "auto": "toggle: autoshoot",
     "interact": "button held: revive a partner or hold a core handle"
   },
-  "intents": ["revive", "grab_core", "release_core", "pick_skill"],
+  "intents": [
+    "revive",
+    "grab_core",
+    "release_core",
+    "pick_skill"
+  ],
   "events": {
-    "episode_start": "evt:episode_start", "episode_end": "evt:episode_end",
-    "grab": "evt:grab", "release": "evt:release",
-    "interact_start": "evt:interact_start", "interact_end": "evt:interact_end",
-    "subgoal": "evt:subgoal", "spawn": "evt:spawn", "despawn": "evt:despawn", "contact": "evt:contact"
+    "episode_start": "evt:episode_start",
+    "episode_end": "evt:episode_end",
+    "grab": "evt:grab",
+    "release": "evt:release",
+    "interact_start": "evt:interact_start",
+    "interact_end": "evt:interact_end",
+    "subgoal": "evt:subgoal",
+    "spawn": "evt:spawn",
+    "despawn": "evt:despawn",
+    "contact": "evt:contact"
   },
-  "cosmetic_messages": ["fx", "chat", "ping", "rate", "offer", "pick_rejected"]
+  "cosmetic_messages": [
+    "fx",
+    "chat",
+    "ping",
+    "rate",
+    "offer",
+    "pick_rejected"
+  ]
 }
