@@ -195,5 +195,11 @@
   "seats": {
     "bot_field": "players.<id>.bot",
     "slot_field": "players.<id>.slot"
+  },
+  "consent": {
+    "status": "notice_at_join",
+    "notice": "By joining a room you agree that the session, including chat and pings, is recorded as Stateloop play data.",
+    "shown": "in the online lobby, next to Quick Match / Create Private Room / Join with Code",
+    "platform": "players reach the game through the Stateloop play portal (signed in); the server cannot verify that per seat"
   }
 }
