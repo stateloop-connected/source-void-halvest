@@ -10,6 +10,8 @@ const args = process.argv.slice(2);
 const SECONDS = Number(args[args.indexOf('--seconds') + 1]) || 120;
 
 function viewFromState(state) {
+  // the state is empty until the first patch arrives (slower over the internet)
+  if (!state || !state.players || !state.agents || !state.objects) return { players: [], enemies: [], core: null, zone: null };
   const players = [];
   state.players.forEach((p, sid) => players.push({ sid, seat: p.slot, x: p.x, y: p.y, downed: p.downed, bledOut: p.bledOut, carrying: p.carrying }));
   const enemies = [];
